@@ -1,0 +1,37 @@
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local
+
+services:
+  app:
+    build:
+      context: ./backend
+    container_name: my_tasks
+    networks:
+      - app-network
+    depends_on:
+      - mysql_db
+    env_file:
+      - .env
+    ports:
+      - '8000:8000'
+
+  mysql_db:
+    image: mysql:8.0
+    container_name: mysql_db
+    networks:
+      - app-network
+    environment:
+#      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    ports:
+      - '3306:3306'
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./mysql/dumps:/docker-entrypoint-initdb.d
