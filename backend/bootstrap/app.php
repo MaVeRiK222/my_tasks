@@ -13,9 +13,10 @@ return $app->configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'task.owner' => \App\Http\Middleware\TaskOwner::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
