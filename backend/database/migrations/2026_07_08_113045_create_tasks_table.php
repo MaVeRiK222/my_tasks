@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TaskStatusEnum;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -17,7 +18,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class);
             $table->string("title", 255);
             $table->text("description");
-            $table->enum("status", ['pending, completed']);
+            $table->enum("status", TaskStatusEnum::values())->default(TaskStatusEnum::PENDING->value);
             $table->timestamp('reminder_at')->nullable();
             $table->timestamps();
         });
