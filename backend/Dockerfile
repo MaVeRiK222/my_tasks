@@ -10,16 +10,14 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     zip \
     unzip \
-    git \
     curl \
-    libpq-dev \
     libonig-dev \
     libzip-dev && \
     docker-php-ext-configure gd --with-freetype --with-jpeg && \
-    docker-php-ext-install pdo pdo_pgsql pgsql pdo_mysql mbstring zip exif pcntl gd && \
+    docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl gd && \
+    pecl install redis && \
+    docker-php-ext-enable redis && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
-
-
 
 RUN groupadd -g 1000 www && \
  useradd -u 1000 -ms /bin/bash -g www www && \
