@@ -26,6 +26,7 @@ services:
     networks:
       - app-network
     environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=TRUE
       - MYSQL_USER=${DB_USERNAME}
       - MYSQL_DATABASE=${DB_DATABASE}
       - MYSQL_PASSWORD=${DB_PASSWORD}
