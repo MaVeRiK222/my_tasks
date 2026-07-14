@@ -26,7 +26,6 @@ services:
     networks:
       - app-network
     environment:
-#      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
       - MYSQL_USER=${DB_USERNAME}
       - MYSQL_DATABASE=${DB_DATABASE}
       - MYSQL_PASSWORD=${DB_PASSWORD}
@@ -35,3 +34,10 @@ services:
     volumes:
       - db-data:/var/lib/mysql
       - ./mysql/dumps:/docker-entrypoint-initdb.d
+  redis:
+    image: redis:alpine
+    container_name: redis_php
+    networks:
+      - app-network
+    ports:
+      - '6379:6379'

@@ -3,11 +3,11 @@
 namespace App\Providers;
 
 use App\Services\ReminderService;
+use App\Services\TaskService;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
-use App\Services\TaskService;
 
-class TaskServiceProvider extends ServiceProvider
+class ReminderServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
@@ -15,8 +15,8 @@ class TaskServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
-        $this->app->singleton(TaskService::class, function (Application $app) {
-            return new TaskService($app->make(ReminderService::class));
+        $this->app->singleton(ReminderService::class, function (Application $app) {
+            return new ReminderService();
         });
     }
 

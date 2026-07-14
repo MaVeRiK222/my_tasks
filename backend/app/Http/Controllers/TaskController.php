@@ -2,28 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CustomTaskException;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
+use App\Services\ReminderService;
 use App\Services\TaskService;
-use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class TaskController extends Controller
 {
     protected TaskService $taskService;
-    
-    public function __construct(TaskService $taskService)
+    protected ReminderService $reminderService;
+
+    public function __construct(TaskService $taskService, ReminderService $reminderService)
     {
         $this->taskService = $taskService;
-    }
-
-    public function getTaskById($task_id)
-    {
-//        return $this->taskService->getById($task_id);
-        return;
+        $this->reminderService = $reminderService;
     }
 
     public function getAllTasksByUserId()
@@ -44,6 +42,7 @@ class TaskController extends Controller
     public function updateTask(UpdateTaskRequest $request, Task $task): JsonResponse
     {
         $validated = $request->validated();
+
         $task = $this->taskService->update($task, $validated);
         return response()->json($task, 200);
     }
@@ -53,13 +52,34 @@ class TaskController extends Controller
         $this->taskService->delete($task);
     }
 
-    public function createOrUpdateTaskReminder($user_id)
+    public function createOrUpdateTaskReminder(Task $task, Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'reminder_at' => ['required', Rule::date()->format('Y-m-d H:i:s'), 'after:now']
+        ]);
+        if ($this->taskService->hasReminder($task)) {
+            if ($this->taskService->isTaskOverdue($task)) {
+                throw CustomTaskException::taskOverdue();
+            }
+            $reminder = $task->reminders()->first();
+            $reminder = $this->reminderService->update($reminder, $validated);
+            return response()->json($reminder, 200);
+        } else {
+            if ($task->user->hasReachedActiveReminderLimit()) {
+                throw CustomTaskException::reminderLimitReached();
+            }
+            $validated['task_id'] = $task->id;
+            $reminder = $this->reminderService->create($validated, $request->user()->id);
+            return response()->json($reminder, 201);
 
+        }
     }
 
-    public function deleteTaskReminder($user_id)
+    public function deleteTaskReminder(Task $task)
     {
-
+        $reminder = $task->reminders()->firstOrFail();
+        $this->reminderService->delete($reminder);
     }
+
+
 }
